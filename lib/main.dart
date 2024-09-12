@@ -57,6 +57,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+  var isChecked = false;
+
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -105,9 +107,25 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('You have pushed the button this many times:',style:TextStyle(fontSize: 60.0)),
+            const  Padding(
+                padding: EdgeInsets.fromLTRB(0.0, 20.0, 39.0, 0.0),
+                child: Text('You have pushed the button this many times:',style:TextStyle(fontSize: 60.0))
+            ),
 
-            Image.asset("images/algonquin.jpg", height:600, width:800),
+
+            Checkbox(value:isChecked,
+                onChanged:(newState) {
+                  setState(() {
+                    isChecked = newState ! ; // ! means non-null assertion
+                  });
+            }  ),
+
+
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Image.asset("images/algonquin.jpg", height:600, width:800),
+         ),
+
 
             ElevatedButton( onPressed: ( ){            }, //Lambda, or anonymous function
                 child:Image.asset("images/algonquin.jpg", height:200, width:200),  )
