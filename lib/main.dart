@@ -105,13 +105,11 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            const Text('You have pushed the button this many times:',style:TextStyle(fontSize: 60.0)),
+
+            Image.asset("images/algonquin.jpg", height:600, width:800)
+
+
           ],
         ),
       ),
