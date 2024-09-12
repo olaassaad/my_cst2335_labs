@@ -107,7 +107,10 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             const Text('You have pushed the button this many times:',style:TextStyle(fontSize: 60.0)),
 
-            Image.asset("images/algonquin.jpg", height:600, width:800)
+            Image.asset("images/algonquin.jpg", height:600, width:800),
+
+            ElevatedButton( onPressed: ( ){            }, //Lambda, or anonymous function
+                child:Image.asset("images/algonquin.jpg", height:200, width:200),  )
 
 
           ],
@@ -120,4 +123,11 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+  //this runs when you click the button
+  void buttonClicked   ( ){
+
+  }
+
+
 }
