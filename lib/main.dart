@@ -57,8 +57,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  late TextEditingController _controller; //late - Constructor in initState()
-
   var isChecked = false;
 
   void _incrementCounter() {
@@ -70,21 +68,6 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
-  }
-
-
-  @override //same as in java
-  void initState() {
-    super.initState(); //call the parent initState()
-    _controller = TextEditingController(); //our late constructor
-  }
-
-
-  @override
-  void dispose()
-  {
-    super.dispose();
-    _controller.dispose();    // clean up memory
   }
 
   @override
@@ -130,13 +113,13 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
 
 
-            TextField(controller: _controller,
-               decoration: InputDecoration(
-                  hintText: "Type something here",
-                  labelText:"Put your first name here",
-              border: OutlineInputBorder(),
-            ),
-            ),
+            Checkbox(value:isChecked,
+                onChanged:(newState) {
+                  setState(() {
+                    isChecked = newState ! ; // ! means non-null assertion
+                  });
+            }  ),
+
 
             Padding(
               padding: EdgeInsets.all(16.0),
@@ -144,15 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
          ),
 
 
-            ElevatedButton( onPressed: ( ){
-              //what was typed is:
-      var input = _controller.value.text;
-
-
-      //to overwrite:
-              _controller.text = "You typed in:" + input;
-
-            }, //Lambda, or anonymous function
+            ElevatedButton( onPressed: ( ){            }, //Lambda, or anonymous function
                 child:Image.asset("images/algonquin.jpg", height:200, width:200),  )
 
 
