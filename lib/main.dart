@@ -145,17 +145,6 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            ElevatedButton(
-              onPressed: () {},
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Image.asset(
-                  "images/algonquin.jpg",
-                  height: 300,
-                  width: 400,
-                ),
-              ),
-            ),
             Checkbox(
               value: isChecked,
               onChanged: (newValue) {
