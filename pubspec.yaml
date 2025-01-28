@@ -63,7 +63,18 @@ flutter:
 #2 spaces:
   assets:
 #4 spaces:
-    - images/algonquin.jpg
+    - images/Beef.jpg
+    - images/Chicken.jpg
+    - images/Pork.jpg
+    - images/Seafood.jpg
+    - images/Main.jpg
+    - images/Salad.jpg
+    - images/Side.jpg
+    - images/Crockpot.jpg
+    - images/IceCream.jpg
+    - images/Brownies.jpg
+    - images/Pie.jpg
+    - images/Cookies.jpg
 
   #   - images/a_dot_ham.jpeg
 
