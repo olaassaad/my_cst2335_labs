@@ -1,3 +1,4 @@
+import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -129,18 +130,47 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void saveUserPreferences() {
-    // TODO: Save username and password to shared preferences.
+    // Save username and password to shared preferences.
+    EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
+    prefs.setString("Username", loginController.value.text);
+    prefs.setString("Password", passwordController.value.text);
   }
 
   void loadUserPreferences() {
-    // TODO: Load username and password.
+    // Load username and password.
+    EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
 
-    // TODO: Show a SnackBar with undo action button.
+    prefs.getString("Username").then((username) {
+      prefs.getString("Password").then((password) {
+        setState(() {
+          loginController.text = username;
+          passwordController.text = password;
+        });
+
+        // If the login and password were set, we show a SnackBar
+        if (username.isNotEmpty && password.isNotEmpty) {
+          showLoginPopulatedSnackBar();
+        }
+      });
+    });
+  }
+
+  void showLoginPopulatedSnackBar() {
+    var snackBar = SnackBar(
+      content: const Text('The login and password were loaded.'),
+      action: SnackBarAction(
+        label: 'Undo',
+        onPressed: clearTextFields,
+      ),
+    );
+    ScaffoldMessenger.of(theContext).showSnackBar(snackBar);
   }
 
   void clearUserPreferences() {
-    // TODO: Clear username and password from shared preferences.
-
+    // Clear username and password from shared preferences.
+    EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
+    prefs.remove("Username");
+    prefs.remove("Password");
     clearTextFields();
   }
 
