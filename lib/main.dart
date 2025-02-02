@@ -29,13 +29,22 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  late BuildContext theContext;
   // Variables to hold the input values
   final TextEditingController loginController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   var imageSource = "images/question-mark.jpg";
 
   @override
+  void initState() {
+    super.initState();
+
+    loadUserPreferences();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    theContext = context;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login Page'),
@@ -71,17 +80,14 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 16.0),
             // Login Button
             ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  // Check the password and update the image
-                  if (passwordController.text == "QWERTY123") {
-                    imageSource = "images/light-bulb.jpg";
-                  } else {
-                    imageSource = "images/stop-sign.jpg";
-                  }
-                });
-              },
+              onPressed: loginClicked,
               child: const Text('Login'),
+            ),
+            const SizedBox(height: 16.0),
+            // Login Button
+            ElevatedButton(
+              onPressed: clearUserPreferences,
+              child: const Text('Logout'),
             ),
             const SizedBox(height: 16.0),
             // Image
@@ -107,6 +113,40 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  void loginClicked() {
+    saveUserPreferences();
+
+    setState(() {
+      // Check the password and update the image
+      if (passwordController.text == "QWERTY123") {
+        imageSource = "images/light-bulb.jpg";
+      } else {
+        imageSource = "images/stop-sign.jpg";
+      }
+    });
+  }
+
+  void saveUserPreferences() {
+    // TODO: Save username and password to shared preferences.
+  }
+
+  void loadUserPreferences() {
+    // TODO: Load username and password.
+
+    // TODO: Show a SnackBar with undo action button.
+  }
+
+  void clearUserPreferences() {
+    // TODO: Clear username and password from shared preferences.
+
+    clearTextFields();
+  }
+
+  void clearTextFields() {
+    loginController.text = "";
+    passwordController.text = "";
   }
 }
 
