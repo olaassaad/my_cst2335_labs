@@ -72,8 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //this runs when you click the button
   void buttonClicked( ){
-
+    var snackBar = const SnackBar( content: Text('Yay! A SnackBar!') );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
-
-
 }
