@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,6 +41,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState(); //call the parent initState()
     _controller = TextEditingController(); //our late constructor
+
+    fetchName().then((name) {
+      if (name != null) {
+        _controller.text = name;
+      }
+    });
   }
 
 
@@ -55,14 +62,22 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Week 4"),
+        title: const Text("Week 4"),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            TextField(
+              controller: _controller,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter your name',
+                labelText: 'Name',
+              ),
+            ),
             ElevatedButton( onPressed: buttonClicked, //Lambda, or anonymous function
-                child:Text("Click Here"),
+                child:const Text("Click Here"),
             )
           ],
         ),
@@ -71,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   //this runs when you click the button
-  void buttonClicked(){
+  void buttonClicked() {
     showAlertDialog();
   }
 
@@ -80,12 +95,12 @@ class _MyHomePageState extends State<MyHomePage> {
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: const Text('Button Alert'),
-          content: const Text('Show a SnackBar?'),
+          content: const Text('Save Login?'),
           actions: <Widget>[
             ElevatedButton(
-                onPressed: () => {
-                  showSnackBar('Yes was pressed'),
-                  closeDialog(),
+                onPressed: () async {
+                  await saveName();
+                  closeDialog();
                 },
                 child: const Text('Yes'),
             ),
@@ -111,5 +126,16 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  Future<void> saveName() async {
+    return SharedPreferences.getInstance().then((prefs) {
+      prefs.setString("Name", _controller.value.text);
+    });
+  }
+
+  Future<String?> fetchName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("Name");
   }
 }
