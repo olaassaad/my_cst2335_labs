@@ -1,5 +1,5 @@
+import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,7 +31,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
+  late BuildContext theContext;
 
   late TextEditingController _controller; //late - Constructor in initState()
 
@@ -43,8 +43,9 @@ class _MyHomePageState extends State<MyHomePage> {
     _controller = TextEditingController(); //our late constructor
 
     fetchName().then((name) {
-      if (name != null) {
-        _controller.text = name;
+      _controller.text = name;
+      if (name.isNotEmpty) {
+        showSnackBar("Welcome back $name");
       }
     });
   }
@@ -59,6 +60,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    theContext = context;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -76,36 +79,49 @@ class _MyHomePageState extends State<MyHomePage> {
                 labelText: 'Name',
               ),
             ),
-            ElevatedButton( onPressed: buttonClicked, //Lambda, or anonymous function
-                child:const Text("Click Here"),
-            )
+            ElevatedButton( onPressed: loginButtonClicked, //Lambda, or anonymous function
+                child:const Text("Login"),
+            ),
+            ElevatedButton(
+                onPressed: clearLogin,
+                child: const Text('Logout')),
           ],
         ),
       ),
     );
   }
 
-  //this runs when you click the button
-  void buttonClicked() {
+  void loginButtonClicked() {
     showAlertDialog();
+  }
+
+  void clearLogin() {
+    EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
+    prefs.remove("Name").then((value) {
+      _controller.text = "";
+    });
   }
 
   void showAlertDialog() {
     showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-          title: const Text('Button Alert'),
-          content: const Text('Save Login?'),
+          title: const Text('Are you sure?'),
+          content: const Text('Stay logged in?'),
           actions: <Widget>[
             ElevatedButton(
-                onPressed: () async {
-                  await saveName();
+                onPressed: () {
+                  saveName();
                   closeDialog();
+                  showSnackBar('You are logged in!');
                 },
                 child: const Text('Yes'),
             ),
             ElevatedButton(
-                onPressed: () => closeDialog(),
+                onPressed: () {
+                  closeDialog();
+                  clearLogin();
+                },
                 child: const Text('No'),
             ),
           ],
@@ -128,14 +144,13 @@ class _MyHomePageState extends State<MyHomePage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Future<void> saveName() async {
-    return SharedPreferences.getInstance().then((prefs) {
-      prefs.setString("Name", _controller.value.text);
-    });
+  void saveName() {
+    EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
+    prefs.setString("Name", _controller.value.text);
   }
 
-  Future<String?> fetchName() async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<String> fetchName() async {
+    EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
     return prefs.getString("Name");
   }
 }
