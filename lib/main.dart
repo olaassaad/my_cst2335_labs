@@ -71,13 +71,44 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   //this runs when you click the button
-  void buttonClicked( ){
-    var snackBar = SnackBar(
-        content: const Text('Yay! A SnackBar!'),
-        action: SnackBarAction(
-          label: 'Hide',
-          onPressed: () { },
+  void buttonClicked(){
+    showAlertDialog();
+  }
+
+  void showAlertDialog() {
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Button Alert'),
+          content: const Text('Show a SnackBar?'),
+          actions: <Widget>[
+            ElevatedButton(
+                onPressed: () => {
+                  showSnackBar('Yes was pressed'),
+                  closeDialog(),
+                },
+                child: const Text('Yes'),
+            ),
+            ElevatedButton(
+                onPressed: () => closeDialog(),
+                child: const Text('No'),
+            ),
+          ],
         ),
+    );
+  }
+
+  void closeDialog() {
+    Navigator.pop(context);
+  }
+
+  void showSnackBar(String message) {
+    var snackBar = SnackBar(
+      content: Text(message),
+      action: SnackBarAction(
+        label: 'Hide',
+        onPressed: () { },
+      ),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
