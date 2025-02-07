@@ -117,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void loginClicked() {
-    saveUserPreferences();
+    showAlertDialog();
 
     setState(() {
       // Check the password and update the image
@@ -177,6 +177,35 @@ class _LoginPageState extends State<LoginPage> {
   void clearTextFields() {
     loginController.text = "";
     passwordController.text = "";
+  }
+
+  void showAlertDialog() {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('Save Login and Password?'),
+        actions: <Widget>[
+          ElevatedButton(
+            onPressed: () {
+              saveUserPreferences();
+              closeDialog();
+            },
+            child: const Text('Yes'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              closeDialog();
+            },
+            child: const Text('No'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void closeDialog() {
+    Navigator.pop(context);
   }
 }
 
