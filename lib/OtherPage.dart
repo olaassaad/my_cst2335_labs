@@ -11,8 +11,13 @@ class OtherPage extends StatefulWidget {
 }
 
 class OtherPageState extends State<OtherPage> {
+
+  late BuildContext thisContext;
+
   @override
   Widget build(BuildContext context) {
+    thisContext = context;
+
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme
@@ -31,12 +36,25 @@ class OtherPageState extends State<OtherPage> {
                     child: const Icon(Icons.arrow_back),
                 ),
                 ElevatedButton(
-                    onPressed: () => launchUrl(Uri.parse("https://www.google.com")),
+                    onPressed: () => launchGoogle(),
                     child: const Text("Open Google"),
                 ),
               ],
             )
         )
     ); //Use a Scaffold to layout a page with an AppBar and main body region
+  }
+
+  void launchGoogle() {
+    Uri url = Uri.parse("https://www.google.com");
+    canLaunchUrl(url).then((canL) {
+      if (canL) {
+        launchUrl(url);
+      } else {
+        ScaffoldMessenger.of(thisContext).showSnackBar(const SnackBar(
+          content: Text("Cannot open Google"),
+        ));
+      }
+    });
   }
 }
