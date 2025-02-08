@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'DataRepository.dart';
 
@@ -28,6 +29,10 @@ class OtherPageState extends State<OtherPage> {
                 ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     child: const Icon(Icons.arrow_back),
+                ),
+                ElevatedButton(
+                    onPressed: () => launchUrl(Uri.parse("https://www.google.com")),
+                    child: const Text("Open Google"),
                 ),
               ],
             )
