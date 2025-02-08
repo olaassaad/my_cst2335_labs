@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_cst2335_labs/OtherPage.dart';
 
 // Main method
 void main() {
@@ -32,7 +33,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      routes: {
+        '/': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
+        '/otherPage': (context) => const OtherPage(),
+      },
     );
   }
 }
@@ -56,23 +60,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
   late TextEditingController _controller; //late - Constructor in initState()
-
-  var isChecked = false;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
 
   @override //same as in java
   void initState() {
@@ -80,12 +68,10 @@ class _MyHomePageState extends State<MyHomePage> {
     _controller = TextEditingController(); //our late constructor
   }
 
-
   @override
-  void dispose()
-  {
+  void dispose() {
     super.dispose();
-    _controller.dispose();    // clean up memory
+    _controller.dispose(); // clean up memory
   }
 
   @override
@@ -125,53 +111,26 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const  Padding(
+            const Padding(
                 padding: EdgeInsets.fromLTRB(0.0, 20.0, 39.0, 0.0),
-                child: Text('You have pushed the button this many times:',style:TextStyle(fontSize: 60.0))
+                child: Text('You have pushed the button this many times:',
+                    style: TextStyle(fontSize: 60.0))
             ),
-
-
-            TextField(controller: _controller,
-               decoration: InputDecoration(
-                  hintText: "Type something here",
-                  labelText:"Put your first name here",
-              border: OutlineInputBorder(),
+            TextField(
+              controller: _controller,
+              decoration: const InputDecoration(
+                hintText: "Type something here",
+                labelText: "Put your first name here",
+                border: OutlineInputBorder(),
+              ),
             ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Image.asset("images/algonquin.jpg", height:600, width:800),
-         ),
-
-
-            ElevatedButton( onPressed: ( ){
-              //what was typed is:
-      var input = _controller.value.text;
-
-
-      //to overwrite:
-              _controller.text = "You typed in:" + input;
-
-            }, //Lambda, or anonymous function
-                child:Image.asset("images/algonquin.jpg", height:200, width:200),  )
-
-
+            ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, '/otherPage'),
+                child: const Text("Go to Other Page"),
+            )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),// This trailing comma makes auto-formatting nicer for build methods.
     );
   }
-
-  //this runs when you click the button
-  void buttonClicked   ( ){
-
-  }
-
-
 }
