@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'DataRepository.dart';
+
 class OtherPage extends StatefulWidget {
   const OtherPage({super.key});
 
@@ -22,7 +24,7 @@ class OtherPageState extends State<OtherPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text("Welcome to the other page"),
+                Text("Welcome back ${DataRepository.loginName}"),
                 ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     child: const Icon(Icons.arrow_back),

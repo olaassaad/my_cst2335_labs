@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_cst2335_labs/DataRepository.dart';
 import 'package:my_cst2335_labs/OtherPage.dart';
 
 // Main method
@@ -125,7 +126,10 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ElevatedButton(
-                onPressed: () => Navigator.pushNamed(context, '/otherPage'),
+                onPressed: () {
+                  DataRepository.loginName = _controller.value.text;
+                  Navigator.pushNamed(context, '/otherPage');
+                },
                 child: const Text("Go to Other Page"),
             )
           ],
