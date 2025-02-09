@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
   @override
   State<ProfilePage> createState() => ProfilePageState();
 }
@@ -42,100 +43,94 @@ class ProfilePageState extends State<ProfilePage> {
     theContext = context;
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme
-              .of(context)
-              .colorScheme
-              .inversePrimary,
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: const Text("Profile Page"),
         ),
         body: Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text("Welcome back ${DataRepository.loginName}"),
-                const SizedBox(height: 32.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: TextField(
-                    controller: firstNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'First Name',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text("Welcome back ${DataRepository.loginName}"),
+            const SizedBox(height: 32.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextField(
+                controller: firstNameController,
+                decoration: const InputDecoration(
+                  labelText: 'First Name',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 16.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: TextField(
-                    controller: lastNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Last Name',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextField(
+                controller: lastNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Last Name',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 16.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: TextField(
-                          controller: phoneController,
-                          decoration: const InputDecoration(
-                            labelText: 'Phone Number',
-                            border: OutlineInputBorder(),
-                          ),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: TextField(
+                        controller: phoneController,
+                        decoration: const InputDecoration(
+                          labelText: 'Phone Number',
+                          border: OutlineInputBorder(),
                         ),
                       ),
-                      IconButton(
-                          onPressed: callPhone,
-                          icon: const Icon(Icons.phone),
+                    ),
+                    IconButton(
+                      onPressed: callPhone,
+                      icon: const Icon(Icons.phone),
+                    ),
+                    const SizedBox(width: 8.0),
+                    IconButton(
+                      onPressed: textPhone,
+                      icon: const Icon(Icons.message),
+                    ),
+                  ],
+                )),
+            const SizedBox(height: 16.0),
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: TextField(
+                        controller: emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email Address',
+                          border: OutlineInputBorder(),
+                        ),
                       ),
-                      const SizedBox(width: 8.0),
-                      IconButton(
-                        onPressed: textPhone,
-                        icon: const Icon(Icons.message),
-                      ),
-                    ],
-                  )
-                ),
-                const SizedBox(height: 16.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      Flexible(
-                          child: TextField(
-                            controller: emailController,
-                            decoration: const InputDecoration(
-                              labelText: 'Email Address',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                      ),
-                      IconButton(onPressed: sendEmail, icon: const Icon(Icons.email)),
-                    ],
-                  )
-                ),
-                const SizedBox(height: 16.0),
-                ElevatedButton(
-                  onPressed: saveData,
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.save),
-                      Text("Save"),
-                    ],
-                  ),
-                )
-              ],
+                    ),
+                    IconButton(
+                        onPressed: sendEmail, icon: const Icon(Icons.email)),
+                  ],
+                )),
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: saveData,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.save),
+                  Text("Save"),
+                ],
+              ),
             )
-        )
-    ); //Use a Scaffold to layout a page with an AppBar and main body region
+          ],
+        ))); //Use a Scaffold to layout a page with an AppBar and main body region
   }
-  
+
   void showSnackBar(String message) {
     var snackBar = SnackBar(
       content: Text(message),

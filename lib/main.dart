@@ -36,6 +36,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   late BuildContext theContext;
+
   // Variables to hold the input values
   final TextEditingController loginController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
