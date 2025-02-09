@@ -1,6 +1,9 @@
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 import 'package:flutter/material.dart';
 
+import 'DataRepository.dart';
+import 'ProfilePage.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -16,8 +19,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      // Set LoginPage as the initial screen
-      home: const LoginPage(),
+      routes: {
+        '/': (context) => const LoginPage(),
+        '/profilePage': (context) => const ProfilePage(),
+      },
     );
   }
 }
@@ -40,7 +45,10 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
 
-    loadUserPreferences();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadUserPreferences();
+      DataRepository.loadData();
+    });
   }
 
   @override
@@ -81,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 16.0),
             // Login Button
             ElevatedButton(
-              onPressed: loginClicked,
+              onPressed: showSaveLoginInfoDialog,
               child: const Text('Login'),
             ),
             const SizedBox(height: 16.0),
@@ -116,15 +124,16 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void loginClicked() {
-    showAlertDialog();
-
+  void tryLogin() {
     setState(() {
       // Check the password and update the image
       if (passwordController.text == "QWERTY123") {
         imageSource = "images/light-bulb.jpg";
+        DataRepository.loginName = loginController.text;
+        Navigator.pushNamed(context, '/profilePage');
       } else {
         imageSource = "images/stop-sign.jpg";
+        showLoginFailedSnackBar();
       }
     });
   }
@@ -166,6 +175,13 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(theContext).showSnackBar(snackBar);
   }
 
+  void showLoginFailedSnackBar() {
+    var snackBar = const SnackBar(
+      content: Text('The login and password did not match.'),
+    );
+    ScaffoldMessenger.of(theContext).showSnackBar(snackBar);
+  }
+
   void clearUserPreferences() {
     // Clear username and password from shared preferences.
     EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
@@ -179,7 +195,7 @@ class _LoginPageState extends State<LoginPage> {
     passwordController.text = "";
   }
 
-  void showAlertDialog() {
+  void showSaveLoginInfoDialog() {
     showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
@@ -190,12 +206,14 @@ class _LoginPageState extends State<LoginPage> {
             onPressed: () {
               saveUserPreferences();
               closeDialog();
+              tryLogin();
             },
             child: const Text('Yes'),
           ),
           ElevatedButton(
             onPressed: () {
               closeDialog();
+              tryLogin();
             },
             child: const Text('No'),
           ),
