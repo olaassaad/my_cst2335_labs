@@ -34,6 +34,7 @@ class ProfilePageState extends State<ProfilePage> {
 
   @override
   void dispose() {
+
     super.dispose();
     saveData();
   }

@@ -46,9 +46,12 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
 
+    DataRepository.loadData();
+    loadUserPreferences();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadUserPreferences();
-      DataRepository.loadData();
+
+      //DataRepository.loadData();
     });
   }
 
