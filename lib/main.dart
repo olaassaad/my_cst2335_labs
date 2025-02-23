@@ -64,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            const Padding(padding: EdgeInsets.symmetric(vertical: 8.0)),
             dataEntry(),
             dataList(),
           ],
@@ -151,11 +152,17 @@ class _MyHomePageState extends State<MyHomePage> {
         itemCount: items.length,
         itemBuilder: (inContext, rowNum) {
           var (item, count) = items[rowNum];
-          return Row(children: [
-            Text("${rowNum + 1}: "),
-            Flexible(child: Text(item)),
-            Text(" x $count"),
-          ]);
+          return Center(
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(children: [
+                  Text("${rowNum + 1}: "),
+                  Expanded(child: Text(item)),
+                  Text(" x $count"),
+                ])
+            )
+          );
         },
     ));
   }
