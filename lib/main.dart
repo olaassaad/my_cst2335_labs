@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Main method
 void main() {
@@ -25,15 +26,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -41,18 +33,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
+  late TextEditingController itemInputController;
+  late TextEditingController quantityInputController;
+  late List<(String, int)> items;
+  late int quantity = 1;
 
   @override //same as in java
   void initState() {
     super.initState(); //call the parent initState()
+    itemInputController = TextEditingController();
+    quantityInputController = TextEditingController();
+    items = [];
   }
 
-
   @override
-  void dispose()
-  {
+  void dispose() {
     super.dispose();
+    itemInputController.dispose();
+    quantityInputController.dispose();
   }
 
   @override
@@ -66,10 +64,99 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            dataEntry(),
+            dataList(),
           ],
         ),
       ),
     );
   }
+  
+  Widget dataEntry() {
+    return Row(children: [
+      ElevatedButton(
+          onPressed: addItem,
+          child: const Text("Add"),
+      ),
+      const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
+      Flexible(child: TextField(
+        controller: itemInputController,
+        decoration: const InputDecoration(
+          hintText: "Enter item name",
+          labelText: "Enter item name",
+          border: OutlineInputBorder(),
+        ),
+      )),
+      const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
+      quantityEntry(),
+    ]);
+  }
 
+  void addItem() {
+    setState(() {
+      items.add((itemInputController.text, quantity));
+      itemInputController.text = "";
+      quantity = 1;
+    });
+  }
+
+  Widget quantityEntry() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          onPressed: decrement,
+          icon: const Icon(Icons.remove),
+        ),
+        SizedBox(
+          width: 50, // Fixed width for text field
+          child: TextField(
+            textAlign: TextAlign.center,
+            keyboardType: TextInputType.number,
+            controller: TextEditingController(text: quantity.toString()),
+            onSubmitted: (value) {
+              setState(() {
+                quantity = int.tryParse(value) ?? 1;
+                if (quantity < 1) quantity = 1; // Prevent invalid values
+              });
+            },
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(vertical: 8),
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: increment,
+          icon: const Icon(Icons.add),
+        ),
+      ],
+    );
+  }
+
+  void decrement() {
+    setState(() {
+      quantity--;
+    });
+  }
+
+  void increment() {
+    setState(() {
+      quantity++;
+    });
+  }
+
+  Widget dataList() {
+    return Expanded(child: ListView.builder(
+        itemCount: items.length,
+        itemBuilder: (inContext, rowNum) {
+          var (item, count) = items[rowNum];
+          return Row(children: [
+            Text("${rowNum + 1}: "),
+            Flexible(child: Text(item)),
+            Text(" x $count"),
+          ]);
+        },
+    ));
+  }
 }
