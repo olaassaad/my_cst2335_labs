@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // Main method
 void main() {
@@ -62,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             const Padding(padding: EdgeInsets.symmetric(vertical: 8.0)),
             dataEntry(),
@@ -72,15 +71,16 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-  
+
   Widget dataEntry() {
     return Row(children: [
       ElevatedButton(
-          onPressed: addItem,
-          child: const Text("Add"),
+        onPressed: addItem,
+        child: const Text("Add"),
       ),
       const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
-      Flexible(child: TextField(
+      Flexible(
+          child: TextField(
         controller: itemInputController,
         decoration: const InputDecoration(
           hintText: "Enter item name",
@@ -148,22 +148,91 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget dataList() {
-    return Expanded(child: ListView.builder(
+    if (items.isEmpty) {
+      return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: Text("There are no items in the list"));
+    }
+    return Expanded(
+      child: ListView.builder(
         itemCount: items.length,
         itemBuilder: (inContext, rowNum) {
           var (item, count) = items[rowNum];
           return Center(
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.8,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Row(children: [
-                  Text("${rowNum + 1}: "),
-                  Expanded(child: Text(item)),
-                  Text(" x $count"),
-                ])
-            )
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              margin: const EdgeInsets.symmetric(
+                  vertical: 6), // Add spacing between rows
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100, // Light background
+                borderRadius: BorderRadius.circular(12), // Rounded corners
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.grey,
+                    blurRadius: 4,
+                    offset: Offset(2, 2),
+                  ),
+                ],
+              ),
+              child: GestureDetector(
+                  onLongPress: () {
+                    promptRemove(inContext, rowNum);
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment
+                        .spaceBetween, // Space between text elements
+                    children: [
+                      Text(
+                        "Item ${rowNum + 1}: ",
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Expanded(
+                          child: Center(
+                        child: Text(
+                          item,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      )),
+                      Text(
+                        " x $count",
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  )),
+            ),
           );
         },
-    ));
+      ),
+    );
+  }
+
+  void promptRemove(BuildContext inContext, int rowNum) {
+    var (item, count) = items[rowNum];
+
+    showDialog(
+        context: inContext,
+        builder: (BuildContext context) => AlertDialog(
+              title: const Text('Remove Item?'),
+              content: Text("Do you want to remove: '$item'"),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      items.removeAt(rowNum);
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Yes'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('No'),
+                ),
+              ],
+            ));
   }
 }
