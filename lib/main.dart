@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'database.dart';
+import 'dao/toDoItemDao.dart';
+import 'entity/toDoItem.dart';
+
 // Main method
 void main() {
   runApp(const MyApp());
@@ -14,21 +18,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -40,15 +29,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -56,122 +36,227 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  late TextEditingController itemInputController;
+  late TextEditingController quantityInputController;
+  late int quantity = 1;
 
-  late TextEditingController _controller; //late - Constructor in initState()
-
-  var isChecked = false;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
+  late ToDoDao todoDao;
+  late List<ToDoItem> items = [];
 
   @override //same as in java
   void initState() {
     super.initState(); //call the parent initState()
-    _controller = TextEditingController(); //our late constructor
+    itemInputController = TextEditingController();
+    quantityInputController = TextEditingController();
+
+    $FloorToDoDatabase.databaseBuilder('todo_database.db').build().then((db) {
+      todoDao = db.toDoDao;
+      todoDao.getAllToDos().then((value) {
+        setState(() {
+          items = value;
+        });
+      });
+    });
   }
 
-
   @override
-  void dispose()
-  {
+  void dispose() {
     super.dispose();
-    _controller.dispose();    // clean up memory
+    itemInputController.dispose();
+    quantityInputController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            const  Padding(
-                padding: EdgeInsets.fromLTRB(0.0, 20.0, 39.0, 0.0),
-                child: Text('You have pushed the button this many times:',style:TextStyle(fontSize: 60.0))
-            ),
-
-
-            TextField(controller: _controller,
-               decoration: InputDecoration(
-                  hintText: "Type something here",
-                  labelText:"Put your first name here",
-              border: OutlineInputBorder(),
-            ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Image.asset("images/algonquin.jpg", height:600, width:800),
-         ),
-
-
-            ElevatedButton( onPressed: ( ){
-              //what was typed is:
-      var input = _controller.value.text;
-
-
-      //to overwrite:
-              _controller.text = "You typed in:" + input;
-
-            }, //Lambda, or anonymous function
-                child:Image.asset("images/algonquin.jpg", height:200, width:200),  )
-
-
+            const Padding(padding: EdgeInsets.symmetric(vertical: 8.0)),
+            dataEntry(),
+            dataList(),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  //this runs when you click the button
-  void buttonClicked   ( ){
-
+  Widget dataEntry() {
+    return Row(children: [
+      ElevatedButton(
+        onPressed: addItem,
+        child: const Text("Add"),
+      ),
+      const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
+      Flexible(
+          child: TextField(
+        controller: itemInputController,
+        decoration: const InputDecoration(
+          hintText: "Enter item name",
+          labelText: "Enter item name",
+          border: OutlineInputBorder(),
+        ),
+      )),
+      const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
+      quantityEntry(),
+    ]);
   }
 
+  void addItem() {
+    var todo = ToDoItem(ToDoItem.ID++, itemInputController.text, quantity);
 
+    todoDao.insertToDo(todo).then((value) {
+      setState(() {
+        items.add(todo);
+        itemInputController.text = "";
+        quantity = 1;
+      });
+    });
+  }
+
+  void deleteItem(int rowNum) {
+    todoDao.deleteToDo(items[rowNum]).then((value) {
+      setState(() {
+        items.removeAt(rowNum);
+      });
+    });
+  }
+
+  Widget quantityEntry() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          onPressed: decrement,
+          icon: const Icon(Icons.remove),
+        ),
+        SizedBox(
+          width: 50, // Fixed width for text field
+          child: TextField(
+            textAlign: TextAlign.center,
+            keyboardType: TextInputType.number,
+            controller: TextEditingController(text: quantity.toString()),
+            onSubmitted: (value) {
+              setState(() {
+                quantity = int.tryParse(value) ?? 1;
+                if (quantity < 1) quantity = 1; // Prevent invalid values
+              });
+            },
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(vertical: 8),
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: increment,
+          icon: const Icon(Icons.add),
+        ),
+      ],
+    );
+  }
+
+  void decrement() {
+    setState(() {
+      quantity--;
+    });
+  }
+
+  void increment() {
+    setState(() {
+      quantity++;
+    });
+  }
+
+  Widget dataList() {
+    if (items.isEmpty) {
+      return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: Text("There are no items in the list"));
+    }
+    return Expanded(
+      child: ListView.builder(
+        itemCount: items.length,
+        itemBuilder: (inContext, rowNum) {
+          var todo = items[rowNum];
+          return Center(
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              margin: const EdgeInsets.symmetric(
+                  vertical: 6), // Add spacing between rows
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100, // Light background
+                borderRadius: BorderRadius.circular(12), // Rounded corners
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.grey,
+                    blurRadius: 4,
+                    offset: Offset(2, 2),
+                  ),
+                ],
+              ),
+              child: GestureDetector(
+                  onLongPress: () {
+                    promptRemove(inContext, rowNum);
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment
+                        .spaceBetween, // Space between text elements
+                    children: [
+                      Text(
+                        "Item ${rowNum + 1}: ",
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Expanded(
+                          child: Center(
+                        child: Text(
+                          todo.text,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      )),
+                      Text(
+                        " x ${todo.quantity}",
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  )),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void promptRemove(BuildContext inContext, int rowNum) {
+    var todo = items[rowNum];
+
+    showDialog(
+        context: inContext,
+        builder: (BuildContext context) => AlertDialog(
+              title: const Text('Remove Item?'),
+              content: Text("Do you want to remove: '${todo.text}'"),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    deleteItem(rowNum);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Yes'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('No'),
+                ),
+              ],
+            ));
+  }
 }
