@@ -125,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
         items.removeAt(rowNum);
       });
     });
-  }
+  }//git test
 
   Widget quantityEntry() {
     return Row(
