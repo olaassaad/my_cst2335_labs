@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'database.dart';
+import 'dao/toDoItemDao.dart';
+import 'entity/toDoItem.dart';
+
 // Main method
 void main() {
   runApp(const MyApp());
@@ -34,15 +38,25 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late TextEditingController itemInputController;
   late TextEditingController quantityInputController;
-  late List<(String, int)> items;
   late int quantity = 1;
+
+  late ToDoDao todoDao;
+  late List<ToDoItem> items = [];
 
   @override //same as in java
   void initState() {
     super.initState(); //call the parent initState()
     itemInputController = TextEditingController();
     quantityInputController = TextEditingController();
-    items = [];
+
+    $FloorToDoDatabase.databaseBuilder('todo_database.db').build().then((db) {
+      todoDao = db.toDoDao;
+      todoDao.getAllToDos().then((value) {
+        setState(() {
+          items = value;
+        });
+      });
+    });
   }
 
   @override
@@ -94,10 +108,22 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void addItem() {
-    setState(() {
-      items.add((itemInputController.text, quantity));
-      itemInputController.text = "";
-      quantity = 1;
+    var todo = ToDoItem(ToDoItem.ID++, itemInputController.text, quantity);
+
+    todoDao.insertToDo(todo).then((value) {
+      setState(() {
+        items.add(todo);
+        itemInputController.text = "";
+        quantity = 1;
+      });
+    });
+  }
+
+  void deleteItem(int rowNum) {
+    todoDao.deleteToDo(items[rowNum]).then((value) {
+      setState(() {
+        items.removeAt(rowNum);
+      });
     });
   }
 
@@ -157,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: ListView.builder(
         itemCount: items.length,
         itemBuilder: (inContext, rowNum) {
-          var (item, count) = items[rowNum];
+          var todo = items[rowNum];
           return Center(
             child: Container(
               width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
@@ -191,13 +217,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       Expanded(
                           child: Center(
                         child: Text(
-                          item,
+                          todo.text,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 18),
                         ),
                       )),
                       Text(
-                        " x $count",
+                        " x ${todo.quantity}",
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
@@ -211,19 +237,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void promptRemove(BuildContext inContext, int rowNum) {
-    var (item, count) = items[rowNum];
+    var todo = items[rowNum];
 
     showDialog(
         context: inContext,
         builder: (BuildContext context) => AlertDialog(
               title: const Text('Remove Item?'),
-              content: Text("Do you want to remove: '$item'"),
+              content: Text("Do you want to remove: '${todo.text}'"),
               actions: <Widget>[
                 ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      items.removeAt(rowNum);
-                    });
+                    deleteItem(rowNum);
                     Navigator.pop(context);
                   },
                   child: const Text('Yes'),
