@@ -81,8 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             const Padding(padding: EdgeInsets.symmetric(vertical: 8.0)),
             responsiveLayout(),
-            dataEntry(),
-            dataList(),
           ],
         ),
       ),
@@ -124,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget listPage() {
-    return Row(children: [
+    return Column(children: [
       dataEntry(),
       dataList(),
     ]);
@@ -137,8 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Text("Add"),
       ),
       const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
-      Flexible(
-          child: TextField(
+      Expanded(child: TextField(
         controller: itemInputController,
         decoration: const InputDecoration(
           hintText: "Enter item name",
@@ -223,59 +220,57 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: EdgeInsets.symmetric(vertical: 24),
           child: Text("There are no items in the list"));
     }
-    return Expanded(
-      child: ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (inContext, rowNum) {
-          var todo = items[rowNum];
-          return Center(
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              margin: const EdgeInsets.symmetric(
-                  vertical: 6), // Add spacing between rows
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100, // Light background
-                borderRadius: BorderRadius.circular(12), // Rounded corners
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.grey,
-                    blurRadius: 4,
-                    offset: Offset(2, 2),
-                  ),
-                ],
-              ),
-              child: GestureDetector(
-                  onTap: () => selectedItem = items[rowNum],
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment
-                        .spaceBetween, // Space between text elements
-                    children: [
-                      Text(
-                        "Item ${rowNum + 1}: ",
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      Expanded(
-                          child: Center(
-                        child: Text(
-                          todo.text,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                      )),
-                      Text(
-                        " x ${todo.quantity}",
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  )),
+    return Expanded(child: ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (inContext, rowNum) {
+        var todo = items[rowNum];
+        return Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            margin: const EdgeInsets.symmetric(
+                vertical: 6), // Add spacing between rows
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100, // Light background
+              borderRadius: BorderRadius.circular(12), // Rounded corners
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.grey,
+                  blurRadius: 4,
+                  offset: Offset(2, 2),
+                ),
+              ],
             ),
-          );
-        },
-      ),
-    );
+            child: GestureDetector(
+                onTap: () => selectedItem = items[rowNum],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment
+                      .spaceBetween, // Space between text elements
+                  children: [
+                    Text(
+                      "Item ${rowNum + 1}: ",
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Expanded(
+                        child: Center(
+                      child: Text(
+                        todo.text,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    )),
+                    Text(
+                      " x ${todo.quantity}",
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                )),
+          ),
+        );
+      },
+    ));
   }
 
   void promptRemove(BuildContext inContext, ToDoItem? todo) {
