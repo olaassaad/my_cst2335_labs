@@ -43,6 +43,8 @@ class _MyHomePageState extends State<MyHomePage> {
   late ToDoDao todoDao;
   late List<ToDoItem> items = [];
 
+  ToDoItem? selectedItem;
+
   @override //same as in java
   void initState() {
     super.initState(); //call the parent initState()
@@ -78,12 +80,54 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             const Padding(padding: EdgeInsets.symmetric(vertical: 8.0)),
+            responsiveLayout(),
             dataEntry(),
             dataList(),
           ],
         ),
       ),
     );
+  }
+
+  Widget responsiveLayout() {
+    var size = MediaQuery.of(context).size;
+    var height = size.height;
+    var width = size.width;
+
+    if (width > height && width > 720) {
+      return landscapeLayout();
+    } else {
+      return portraitLayout();
+    }
+  }
+
+  Widget landscapeLayout() {
+    return Row(
+      children:[
+        Expanded(
+          flex: 1, // takes  a/(a+b)  of available width
+          child: listPage(),
+        ),
+        Expanded(
+          flex: 2, // takes b(a+b) of available width
+          child: detailsPage(),
+        )
+      ]);
+  }
+
+  Widget portraitLayout() {
+    if (selectedItem == null) {
+      return listPage();
+    } else {
+      return detailsPage();
+    }
+  }
+
+  Widget listPage() {
+    return Row(children: [
+      dataEntry(),
+      dataList(),
+    ]);
   }
 
   Widget dataEntry() {
@@ -119,10 +163,10 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void deleteItem(int rowNum) {
-    todoDao.deleteToDo(items[rowNum]).then((value) {
+  void deleteItem(ToDoItem? item) {
+    todoDao.deleteToDo(item!).then((value) {
       setState(() {
-        items.removeAt(rowNum);
+        items.remove(item);
       });
     });
   }
@@ -202,9 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
               child: GestureDetector(
-                  onLongPress: () {
-                    promptRemove(inContext, rowNum);
-                  },
+                  onTap: () => selectedItem = items[rowNum],
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment
                         .spaceBetween, // Space between text elements
@@ -236,18 +278,16 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void promptRemove(BuildContext inContext, int rowNum) {
-    var todo = items[rowNum];
-
+  void promptRemove(BuildContext inContext, ToDoItem? todo) {
     showDialog(
         context: inContext,
         builder: (BuildContext context) => AlertDialog(
               title: const Text('Remove Item?'),
-              content: Text("Do you want to remove: '${todo.text}'"),
+              content: Text("Do you want to remove: '${todo?.text}'"),
               actions: <Widget>[
                 ElevatedButton(
                   onPressed: () {
-                    deleteItem(rowNum);
+                    deleteItem(todo);
                     Navigator.pop(context);
                   },
                   child: const Text('Yes'),
@@ -258,5 +298,30 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ));
+  }
+
+  Widget detailsPage() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Selected Item Id: ${selectedItem!.id}"),
+          Text("Selected Item Text: ${selectedItem!.text}"),
+          Text("Selected Item Quantity: ${selectedItem!.quantity}"),
+          ElevatedButton(
+            onPressed: () => promptRemove(context, selectedItem),
+            child: const Text('Delete'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                selectedItem = null;
+              });
+            },
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 }
