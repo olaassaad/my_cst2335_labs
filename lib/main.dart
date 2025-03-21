@@ -76,13 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            const Padding(padding: EdgeInsets.symmetric(vertical: 8.0)),
-            responsiveLayout(),
-          ],
-        ),
+        child: responsiveLayout(),
       ),
     );
   }
@@ -103,11 +97,13 @@ class _MyHomePageState extends State<MyHomePage> {
     return Row(
       children:[
         Expanded(
-          flex: 1, // takes  a/(a+b)  of available width
+          key: const Key('ExpandListPage'),
+          flex: 2, // takes  a/(a+b)  of available width
           child: listPage(),
         ),
         Expanded(
-          flex: 2, // takes b(a+b) of available width
+          key: const Key('ExpandDetailsPage'),
+          flex: 1, // takes b(a+b) of available width
           child: detailsPage(),
         )
       ]);
@@ -122,19 +118,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget listPage() {
-    return Column(children: [
-      dataEntry(),
-      dataList(),
-    ]);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        dataEntry(),
+        dataList(),
+      ],
+    );
   }
 
   Widget dataEntry() {
     return Row(children: [
-      ElevatedButton(
-        onPressed: addItem,
-        child: const Text("Add"),
-      ),
-      const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
       Expanded(child: TextField(
         controller: itemInputController,
         decoration: const InputDecoration(
@@ -143,8 +137,11 @@ class _MyHomePageState extends State<MyHomePage> {
           border: OutlineInputBorder(),
         ),
       )),
-      const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
       quantityEntry(),
+      ElevatedButton(
+        onPressed: addItem,
+        child: const Text("Add"),
+      ),
     ]);
   }
 
@@ -225,11 +222,15 @@ class _MyHomePageState extends State<MyHomePage> {
       itemBuilder: (inContext, rowNum) {
         var todo = items[rowNum];
         return Center(
+          child: GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedItem = items[rowNum];
+            });
+          },
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            margin: const EdgeInsets.symmetric(
-                vertical: 6), // Add spacing between rows
+            margin: const EdgeInsets.symmetric(vertical: 6), // Add spacing between rows
             decoration: BoxDecoration(
               color: Colors.grey.shade100, // Light background
               borderRadius: BorderRadius.circular(12), // Rounded corners
@@ -241,32 +242,30 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ),
-            child: GestureDetector(
-                onTap: () => selectedItem = items[rowNum],
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment
-                      .spaceBetween, // Space between text elements
-                  children: [
-                    Text(
-                      "Item ${rowNum + 1}: ",
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between text elements
+              children: [
+                Text(
+                  "Item ${rowNum + 1}: ",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      todo.text,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 18),
                     ),
-                    Expanded(
-                        child: Center(
-                      child: Text(
-                        todo.text,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                    )),
-                    Text(
-                      " x ${todo.quantity}",
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                )),
+                  )
+                ),
+                Text(
+                  " x ${todo.quantity}",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            )),
           ),
         );
       },
@@ -275,45 +274,54 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void promptRemove(BuildContext inContext, ToDoItem? todo) {
     showDialog(
-        context: inContext,
-        builder: (BuildContext context) => AlertDialog(
-              title: const Text('Remove Item?'),
-              content: Text("Do you want to remove: '${todo?.text}'"),
-              actions: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    deleteItem(todo);
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Yes'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('No'),
-                ),
-              ],
-            ));
+      context: inContext,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Remove Item?'),
+        content: Text("Do you want to remove: '${todo?.text}'"),
+        actions: <Widget>[
+          ElevatedButton(
+            onPressed: () {
+              deleteItem(todo);
+              Navigator.pop(context);
+            },
+            child: const Text('Yes'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('No'),
+          ),
+        ],
+      ));
   }
 
   Widget detailsPage() {
+    if (selectedItem == null) {
+      return const Center(child: Text("No item selected"));
+    }
     return Center(
       child: Column(
+        key: const Key('Details'),
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text("Selected Item Id: ${selectedItem!.id}"),
           Text("Selected Item Text: ${selectedItem!.text}"),
           Text("Selected Item Quantity: ${selectedItem!.quantity}"),
-          ElevatedButton(
-            onPressed: () => promptRemove(context, selectedItem),
-            child: const Text('Delete'),
+          IconButton(
+            onPressed: () {
+              promptRemove(context, selectedItem);
+              setState(() {
+                selectedItem = null;
+              });
+            },
+            icon: const Icon(Icons.delete),
           ),
-          ElevatedButton(
+          IconButton(
             onPressed: () {
               setState(() {
                 selectedItem = null;
               });
             },
-            child: const Text('Close'),
+            icon: const Icon(Icons.close),
           ),
         ],
       ),
