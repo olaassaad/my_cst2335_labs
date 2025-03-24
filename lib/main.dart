@@ -43,6 +43,8 @@ class _MyHomePageState extends State<MyHomePage> {
   late ToDoDao todoDao;
   late List<ToDoItem> items = [];
 
+  ToDoItem? selectedItem;
+
   @override //same as in java
   void initState() {
     super.initState(); //call the parent initState()
@@ -74,27 +76,60 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            const Padding(padding: EdgeInsets.symmetric(vertical: 8.0)),
-            dataEntry(),
-            dataList(),
-          ],
-        ),
+        child: responsiveLayout(),
       ),
+    );
+  }
+
+  Widget responsiveLayout() {
+    var size = MediaQuery.of(context).size;
+    var height = size.height;
+    var width = size.width;
+
+    if (width > height && width > 720) {
+      return landscapeLayout();
+    } else {
+      return portraitLayout();
+    }
+  }
+
+  Widget landscapeLayout() {
+    return Row(
+      children:[
+        Expanded(
+          key: const Key('ExpandListPage'),
+          flex: 2, // takes  a/(a+b)  of available width
+          child: listPage(),
+        ),
+        Expanded(
+          key: const Key('ExpandDetailsPage'),
+          flex: 1, // takes b(a+b) of available width
+          child: detailsPage(),
+        )
+      ]);
+  }
+
+  Widget portraitLayout() {
+    if (selectedItem == null) {
+      return listPage();
+    } else {
+      return detailsPage();
+    }
+  }
+
+  Widget listPage() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        dataEntry(),
+        dataList(),
+      ],
     );
   }
 
   Widget dataEntry() {
     return Row(children: [
-      ElevatedButton(
-        onPressed: addItem,
-        child: const Text("Add"),
-      ),
-      const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
-      Flexible(
-          child: TextField(
+      Expanded(child: TextField(
         controller: itemInputController,
         decoration: const InputDecoration(
           hintText: "Enter item name",
@@ -102,8 +137,11 @@ class _MyHomePageState extends State<MyHomePage> {
           border: OutlineInputBorder(),
         ),
       )),
-      const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
       quantityEntry(),
+      ElevatedButton(
+        onPressed: addItem,
+        child: const Text("Add"),
+      ),
     ]);
   }
 
@@ -119,10 +157,10 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void deleteItem(int rowNum) {
-    todoDao.deleteToDo(items[rowNum]).then((value) {
+  void deleteItem(ToDoItem? item) {
+    todoDao.deleteToDo(item!).then((value) {
       setState(() {
-        items.removeAt(rowNum);
+        items.remove(item);
       });
     });
   }
@@ -179,84 +217,114 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: EdgeInsets.symmetric(vertical: 24),
           child: Text("There are no items in the list"));
     }
-    return Expanded(
-      child: ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (inContext, rowNum) {
-          var todo = items[rowNum];
-          return Center(
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              margin: const EdgeInsets.symmetric(
-                  vertical: 6), // Add spacing between rows
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100, // Light background
-                borderRadius: BorderRadius.circular(12), // Rounded corners
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.grey,
-                    blurRadius: 4,
-                    offset: Offset(2, 2),
-                  ),
-                ],
-              ),
-              child: GestureDetector(
-                  onLongPress: () {
-                    promptRemove(inContext, rowNum);
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment
-                        .spaceBetween, // Space between text elements
-                    children: [
-                      Text(
-                        "Item ${rowNum + 1}: ",
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      Expanded(
-                          child: Center(
-                        child: Text(
-                          todo.text,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                      )),
-                      Text(
-                        " x ${todo.quantity}",
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  )),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void promptRemove(BuildContext inContext, int rowNum) {
-    var todo = items[rowNum];
-
-    showDialog(
-        context: inContext,
-        builder: (BuildContext context) => AlertDialog(
-              title: const Text('Remove Item?'),
-              content: Text("Do you want to remove: '${todo.text}'"),
-              actions: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    deleteItem(rowNum);
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Yes'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('No'),
+    return Expanded(child: ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (inContext, rowNum) {
+        var todo = items[rowNum];
+        return Center(
+          child: GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedItem = items[rowNum];
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            margin: const EdgeInsets.symmetric(vertical: 6), // Add spacing between rows
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100, // Light background
+              borderRadius: BorderRadius.circular(12), // Rounded corners
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.grey,
+                  blurRadius: 4,
+                  offset: Offset(2, 2),
                 ),
               ],
-            ));
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between text elements
+              children: [
+                Text(
+                  "Item ${rowNum + 1}: ",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      todo.text,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  )
+                ),
+                Text(
+                  " x ${todo.quantity}",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            )),
+          ),
+        );
+      },
+    ));
+  }
+
+  void promptRemove(BuildContext inContext, ToDoItem? todo) {
+    showDialog(
+      context: inContext,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Remove Item?'),
+        content: Text("Do you want to remove: '${todo?.text}'"),
+        actions: <Widget>[
+          ElevatedButton(
+            onPressed: () {
+              deleteItem(todo);
+              Navigator.pop(context);
+            },
+            child: const Text('Yes'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('No'),
+          ),
+        ],
+      ));
+  }
+
+  Widget detailsPage() {
+    if (selectedItem == null) {
+      return const Center(child: Text("No item selected"));
+    }
+    return Center(
+      child: Column(
+        key: const Key('Details'),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Selected Item Id: ${selectedItem!.id}"),
+          Text("Selected Item Text: ${selectedItem!.text}"),
+          Text("Selected Item Quantity: ${selectedItem!.quantity}"),
+          IconButton(
+            onPressed: () {
+              promptRemove(context, selectedItem);
+              setState(() {
+                selectedItem = null;
+              });
+            },
+            icon: const Icon(Icons.delete),
+          ),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                selectedItem = null;
+              });
+            },
+            icon: const Icon(Icons.close),
+          ),
+        ],
+      ),
+    );
   }
 }
